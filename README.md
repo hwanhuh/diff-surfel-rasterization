@@ -1,5 +1,7 @@
 # Differential Surfel Rasterization
 
+Add compute relocation tensor for Markov Chain Monte Carlo 2D GS
+
 This is the rasterization engine for the paper "2D Gaussian Splatting for  Geometrically Accurate Radiance Fields". If you can make use of it in your own research, please be so kind to cite us.
 
 <section class="section" id="BibTeX">
