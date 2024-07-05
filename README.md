@@ -6,18 +6,24 @@ This relocation strategy enhances handling Gaussian splat parameters, focusing o
 
 ***Except for the relocation kernel, the engine is exactly same as the original.***
 
-### Installation 
-- If you want to use the engine, you should reinstall the diff-surfel-rasterization within this project
+## Installation 
+To use the engine, follow these steps:
+
+- Clone the repository:
 ```bash
 git clone https://github.com/hwanhuh/diff-surfel-rasterization.git
+cd diff-surfel-rasterization
+```
+- Install the package
+```bash
 pip install . --no-cache
 ```
-- or re-setup the python cpp extension project
+- Alternatively, you can set up the Python C++ extension project:
 ```bash
 python setup.py build_ext --inplace
 ```
 
-### USAGE 
+## Example Usage
 ```python
 from diff_surfel_rasterization import compute_relocation
 import torch
@@ -34,6 +40,18 @@ def compute_relocation_cuda(
     scales,  # [N, 2]
     ratios,  # [N]
 ):
+    """
+    Computes new opacities and scales using the MCMC relocation kernel.
+
+    Args:
+        opacities (torch.Tensor): Array of opacities for each Gaussian splat.
+        scales (torch.Tensor): Array of scales for each Gaussian splat.
+        ratios (torch.Tensor): Array of ratios used in relocation computation.
+
+    Returns:
+        new_opacities (torch.Tensor): Updated opacities after relocation.
+        new_scales (torch.Tensor): Updated scales after relocation.
+    """
     N = opacities.shape[0]
     opacities = opacities.contiguous()
     scales = torch.cat([scales, torch.ones(scales.shape[0], 1, device=scales.device)], dim=1)
@@ -45,4 +63,10 @@ def compute_relocation_cuda(
         opacities, scales, ratios, BINOMS, N_MAX
     )
     return new_opacities, new_scales
-``` 
+```
+
+## Acknowledgments
+
+This project builds upon the research and implementations detailed in the following papers:
+- [3D Gaussian Splatting as Markov Chain Monte Carlo](https://ubc-vision.github.io/3dgs-mcmc/)
+- [2D Gaussian Splatting for Geometrically Accurate Radiance Fields](https://surfsplatting.github.io/)
