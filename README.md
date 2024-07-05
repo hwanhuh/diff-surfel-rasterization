@@ -29,7 +29,11 @@ for n in range(N_MAX):
     for k in range(n+1):
         BINOMS[n, k] = math.comb(n, k)
 
-def compute_relocation_cuda(opacities, scales,  ratios):
+def compute_relocation_cuda(
+    opacities,  # [N]
+    scales,  # [N, 2]
+    ratios,  # [N]
+):
     N = opacities.shape[0]
     opacities = opacities.contiguous()
     scales = torch.cat([scales, torch.ones(scales.shape[0], 1, device=scales.device)], dim=1)
