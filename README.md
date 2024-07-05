@@ -54,7 +54,6 @@ def compute_relocation_cuda(
     """
     N = opacities.shape[0]
     opacities = opacities.contiguous()
-    scales = torch.cat([scales, torch.ones(scales.shape[0], 1, device=scales.device)], dim=1)
     scales = scales.contiguous()
     ratios.clamp_(min=1, max=N_MAX)
     ratios = ratios.int().contiguous()
