@@ -48,6 +48,7 @@ compute_relocation_tensor(torch::Tensor &opacities, torch::Tensor &scales,
             N, opacities.data_ptr<float>(), scales.data_ptr<float>(),
             ratios.data_ptr<int>(), binoms.data_ptr<float>(), n_max,
             new_opacities.data_ptr<float>(), new_scales.data_ptr<float>());
+        cudaDeviceSynchronize();
     }
     return std::make_tuple(new_opacities, new_scales);
 }
