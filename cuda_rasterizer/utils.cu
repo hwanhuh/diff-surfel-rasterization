@@ -24,8 +24,8 @@ __global__ void compute_relocation_kernel(int N, float *opacities, float *scales
         }
     }
     float coeff = (opacities[idx] / denom_sum);
-    for (int i = 0; i < 3; ++i)
-        new_scales[idx * 3 + i] = coeff * scales[idx * 3 + i];
+    for (int i = 0; i < 2; ++i)
+        new_scales[idx * 2 + i] = coeff * scales[idx * 2 + i];
 }
 
 std::tuple<torch::Tensor, torch::Tensor>
@@ -48,6 +48,7 @@ compute_relocation_tensor(torch::Tensor &opacities, torch::Tensor &scales,
             N, opacities.data_ptr<float>(), scales.data_ptr<float>(),
             ratios.data_ptr<int>(), binoms.data_ptr<float>(), n_max,
             new_opacities.data_ptr<float>(), new_scales.data_ptr<float>());
+        cudaDeviceSynchronize();
     }
     return std::make_tuple(new_opacities, new_scales);
 }
