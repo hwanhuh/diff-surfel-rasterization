@@ -414,7 +414,7 @@ void CudaRasterizer::Rasterizer::backward(
 		dL_dpix,
 		dL_depths,
 		dL_dtransMat,
-		(float3*)dL_dmean2D,
+		(float4*)dL_dmean2D,
 		dL_dnormal,
 		dL_dopacity,
 		dL_dcolor), debug)
@@ -437,7 +437,7 @@ void CudaRasterizer::Rasterizer::backward(
 		focal_x, focal_y,
 		tan_fovx, tan_fovy,
 		(glm::vec3*)campos,
-		(float3*)dL_dmean2D, // gradient inputs
+		(float4*)dL_dmean2D, // gradient inputs
 		dL_dnormal,		     // gradient inputs
 		dL_dtransMat,
 		dL_dcolor,
