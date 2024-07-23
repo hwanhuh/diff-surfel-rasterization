@@ -1,33 +1,71 @@
-# Differential Surfel Rasterization
+# Differential Surfel Rasterization MCMC
 
-This is the rasterization engine for the paper "2D Gaussian Splatting for  Geometrically Accurate Radiance Fields". If you can make use of it in your own research, please be so kind to cite us.
+This project extends the [surfel-rasterization engine](https://github.com/hbb1/diff-surfel-rasterization) of 2D Gaussian Splatting, by integrating a relocation kernel based on Markov Chain Monte Carlo ([3DGS-MCMC](https://ubc-vision.github.io/3dgs-mcmc/)) principles. 
 
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop content">
-    <h2 class="title">BibTeX</h2>
-    <pre><code>@inproceedings{Huang2DGS2024,
-    title={2D Gaussian Splatting for Geometrically Accurate Radiance Fields},
-    author={Huang, Binbin and Yu, Zehao and Chen, Anpei and Geiger, Andreas and Gao, Shenghua},
-    publisher = {Association for Computing Machinery},
-    booktitle = {SIGGRAPH 2024 Conference Papers},
-    year      = {2024},
-    doi       = {10.1145/3641519.3657428}
-}</code></pre>
-  </div>
-</section>
+This relocation strategy enhances handling Gaussian splat parameters, focusing on maintaining sample state probabilities during heuristic moves like 'move', 'split', 'clone', 'prune', and 'add'.
 
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop content">
-    <h2 class="title">BibTeX</h2>
-    <pre><code>@Article{kerbl3Dgaussians,
-      author       = {Kerbl, Bernhard and Kopanas, Georgios and Leimk{\"u}hler, Thomas and Drettakis, George},
-      title        = {3D Gaussian Splatting for Real-Time Radiance Field Rendering},
-      journal      = {ACM Transactions on Graphics},
-      number       = {4},
-      volume       = {42},
-      month        = {July},
-      year         = {2023},
-      url          = {https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/}
-}</code></pre>
-  </div>
-</section>
+***Except for the relocation kernel, the engine is exactly same as the original.***
+
+## Installation 
+To use the engine, follow these steps:
+
+- Clone the repository:
+```bash
+git clone https://github.com/hwanhuh/diff-surfel-rasterization.git
+cd diff-surfel-rasterization
+```
+- Install the package
+```bash
+pip install . --no-cache
+```
+- Alternatively, you can set up the Python C++ extension project:
+```bash
+python setup.py build_ext --inplace
+```
+
+## Example Usage
+```python
+from diff_surfel_rasterization import compute_relocation
+import torch
+import math
+
+N_MAX = 51
+BINOMS = torch.zeros((N_MAX, N_MAX)).float().cuda()
+for n in range(N_MAX):
+    for k in range(n+1):
+        BINOMS[n, k] = math.comb(n, k)
+
+def compute_relocation_cuda(
+    opacities,  # [N]
+    scales,  # [N, 2]
+    ratios,  # [N]
+):
+    """
+    Computes new opacities and scales using the MCMC relocation kernel.
+
+    Args:
+        opacities (torch.Tensor): Array of opacities for each Gaussian splat.
+        scales (torch.Tensor): Array of scales for each Gaussian splat.
+        ratios (torch.Tensor): Array of ratios used in relocation computation.
+
+    Returns:
+        new_opacities (torch.Tensor): Updated opacities after relocation.
+        new_scales (torch.Tensor): Updated scales after relocation.
+    """
+    N = opacities.shape[0]
+    opacities = opacities.contiguous()
+    scales = scales.contiguous()
+    ratios.clamp_(min=1, max=N_MAX)
+    ratios = ratios.int().contiguous()
+
+    new_opacities, new_scales = compute_relocation(
+        opacities, scales, ratios, BINOMS, N_MAX
+    )
+    return new_opacities, new_scales
+```
+
+## Acknowledgments
+
+This project builds upon the research and implementations detailed in the following papers:
+- [3D Gaussian Splatting as Markov Chain Monte Carlo](https://ubc-vision.github.io/3dgs-mcmc/)
+- [2D Gaussian Splatting for Geometrically Accurate Radiance Fields](https://surfsplatting.github.io/)
